@@ -36,7 +36,7 @@ public class MainManager : MonoBehaviour
         public string PlayerText;
     }
 
-    // Start is called before the first frame update
+
     void Start()
     {
         string path = Application.persistentDataPath + "/BestScoreData.json";

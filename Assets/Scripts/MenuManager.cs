@@ -13,7 +13,7 @@ public class MenuManager : MonoBehaviour
     public Text bestScoreText;
     public static string playerName;
 
-    // Start is called before the first frame update
+
     void Start()
     {
         string path1 = Application.persistentDataPath + "/BestScoreData.json";
