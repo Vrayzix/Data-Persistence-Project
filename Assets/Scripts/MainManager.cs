@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 
 public class MainManager : MonoBehaviour
 {
@@ -11,21 +12,46 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text bestScoreText;
     public GameObject GameOverText;
-    
+
     private bool m_Started = false;
     private int m_Points;
-    
+    private int m_highestPoints;
+
     private bool m_GameOver = false;
 
-    
+    [System.Serializable]
+    public class BestScore
+    {
+        public string bestScorePlayerText;
+        public string PlayerText;
+        public string bestScoreText;
+        public string ScoreText;
+        public int highestScore;
+    }
+    [System.Serializable]
+    public class PlayerName
+    {
+        public string PlayerText;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
+        string path = Application.persistentDataPath + "/BestScoreData.json";
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            BestScore bestScore = JsonUtility.FromJson<BestScore>(json);
+            m_highestPoints = bestScore.highestScore;
+            bestScoreText.text = bestScore.bestScoreText;
+        }
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
-        int[] pointCountArray = new [] {1,1,2,2,5,5};
+
+        int[] pointCountArray = new[] { 1, 1, 2, 2, 5, 5 };
         for (int i = 0; i < LineCount; ++i)
         {
             for (int x = 0; x < perLine; ++x)
@@ -70,7 +96,37 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
+        SavePlayerName();
+        CompareScores();
         m_GameOver = true;
         GameOverText.SetActive(true);
     }
+
+    void CompareScores()
+    {
+        if (m_Points > m_highestPoints)
+        {
+            BestScore bestScore = new BestScore();
+
+            bestScore.highestScore = m_Points;
+            bestScore.bestScorePlayerText = MenuManager.playerName;
+            bestScore.ScoreText = ScoreText.text;
+
+            bestScore.bestScoreText = "Best Score : " + bestScore.bestScorePlayerText + " : " + bestScore.highestScore;
+
+            bestScoreText.text = bestScore.bestScoreText;
+            string json = JsonUtility.ToJson(bestScore);
+            File.WriteAllText(Application.persistentDataPath + "/BestScoreData.json", json);
+        }
+
+    }
+
+    void SavePlayerName()
+    {
+        PlayerName playerName = new PlayerName();
+        playerName.PlayerText = MenuManager.playerName;
+        string json = JsonUtility.ToJson(playerName);
+        File.WriteAllText(Application.persistentDataPath + "/PlayerName.json",json);
+    }
+
 }
